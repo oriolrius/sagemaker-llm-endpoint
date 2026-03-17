@@ -151,7 +151,7 @@ Resources:
           HF_MODEL_ID: !Ref HuggingFaceModelId
           OPTION_ROLLING_BATCH: vllm
           OPTION_DTYPE: fp16
-          OPTION_MAX_MODEL_LEN: '1024'
+          OPTION_MAX_MODEL_LEN: '8192'
           OPTION_TENSOR_PARALLEL_DEGREE: '1'
           OPTION_GPU_MEMORY_UTILIZATION: '0.9'
           OPTION_MODEL_LOADING_TIMEOUT: '1800'
