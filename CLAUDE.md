@@ -148,7 +148,7 @@ sagemaker-using_model/
 ├── docs/                      # Additional documentation
 │   └── sagemaker_quotas.md   # SageMaker instance quotas and pricing
 ├── README.md                  # Main documentation
-├── DEPLOYMENT_NOTES.md        # Step-by-step deployment guide
+├── cookbook.md                 # Step-by-step deployment cookbook
 └── CLAUDE.md                  # This file
 ```
 
