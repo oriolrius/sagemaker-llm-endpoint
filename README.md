@@ -1,6 +1,6 @@
-# SageMaker vLLM + OpenAI API + OpenWebUI
+# SageMaker LLM Endpoint + OpenAI API + OpenWebUI
 
-Deploy a HuggingFace model on AWS SageMaker with vLLM, exposed via an OpenAI-compatible API, with OpenWebUI for a chat interface.
+Deploy a HuggingFace language model on AWS SageMaker with vLLM, exposed via an OpenAI-compatible API, with OpenWebUI for a chat interface.
 
 ## Architecture
 
@@ -18,7 +18,7 @@ Deploy a HuggingFace model on AWS SageMaker with vLLM, exposed via an OpenAI-com
 
 | Component | Description |
 |-----------|-------------|
-| **SageMaker Endpoint** | Runs vLLM with your HuggingFace model on GPU |
+| **SageMaker Endpoint** | Runs your HuggingFace model on GPU via vLLM |
 | **Lambda** | Proxies OpenAI-format requests to SageMaker (handles SigV4 signing) |
 | **API Gateway** | Public HTTP API (OpenAI-compatible) |
 | **EC2 + OpenWebUI** | Web-based chat interface |
@@ -82,9 +82,9 @@ cd infra/
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `--model-id` | distilgpt2 | HuggingFace model ID |
+| `--model-id` | Qwen/Qwen2.5-1.5B-Instruct | HuggingFace model ID |
 | `--sagemaker-instance` | ml.g4dn.xlarge | GPU instance type |
-| `--ec2-instance` | t3a.small | EC2 instance for OpenWebUI |
+| `--ec2-instance` | t3.small | EC2 instance for OpenWebUI |
 | `--key-pair` | - | EC2 key pair for SSH access |
 | `--stack-name` | openai-sagemaker-stack | CloudFormation stack name |
 
@@ -94,8 +94,8 @@ cd infra/
 ./deploy-full-stack.sh \
   --vpc-id vpc-xxx \
   --subnet-id subnet-xxx \
-  --model-id gpt2-medium \
-  --sagemaker-instance ml.g5.xlarge
+  --model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+  --sagemaker-instance ml.g4dn.xlarge
 ```
 
 ## Cost
@@ -112,17 +112,9 @@ cd infra/
 
 ## Notes
 
-### Base Models vs Instruction-Tuned
+### Default Model
 
-The default model (distilgpt2) is a **base model**:
-
-| Prompt Type | Works? |
-|-------------|--------|
-| Text completion: `"The capital of France is"` | ✅ Yes |
-| Q&A format: `"Q: What is AI?\nA:"` | ⚠️ Partial |
-| Direct questions: `"What is AI?"` | ❌ No |
-
-For chat behavior, use an instruction-tuned model like `meta-llama/Llama-2-7b-chat-hf`.
+The default model is **Qwen/Qwen2.5-1.5B-Instruct**, a 1.5B parameter instruction-tuned model. It can follow instructions, answer questions, write code, and hold conversations in multiple languages. It fits easily on a T4 GPU (~3 GB in fp16).
 
 ### Security
 

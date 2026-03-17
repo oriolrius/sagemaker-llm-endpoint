@@ -38,7 +38,7 @@ Deploy the full stack as an independent, self-contained environment. This mode c
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--stack-name` | openai-sagemaker-stack | CloudFormation stack name |
-| `--model-id` | distilgpt2 | HuggingFace model ID |
+| `--model-id` | Qwen/Qwen2.5-1.5B-Instruct | HuggingFace model ID |
 | `--sagemaker-instance` | ml.g4dn.xlarge | GPU instance type |
 | `--ec2-instance` | t3.small | EC2 instance type |
 | `--key-pair` | - | EC2 key pair for SSH |
@@ -73,7 +73,7 @@ This deletes all resources including the SageMaker execution role.
                      │                                           ▼             │
                      │                               ┌─────────────────────┐   │
                      │                               │  SageMaker Endpoint │   │
-                     │                               │  (vLLM + distilgpt2)│   │
+                     │                               │  (vLLM + Qwen2.5)   │   │
                      │                               └─────────────────────┘   │
                      │                                           │             │
                      │                                           ▼             │

@@ -195,7 +195,7 @@ uv run pytest --cov=openai_proxy --cov-report=term-missing
 **Parameters:**
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `HuggingFaceModelId` | distilgpt2 | Model from HuggingFace Hub |
+| `HuggingFaceModelId` | Qwen/Qwen2.5-1.5B-Instruct | Model from HuggingFace Hub |
 | `SageMakerInstanceType` | ml.g4dn.xlarge | GPU instance |
 | `ExternalSageMakerRoleArn` | (optional) | Existing SageMaker execution role ARN (for Domain integration) |
 | `EC2InstanceType` | t3.small | OpenWebUI host |

@@ -69,8 +69,8 @@ All five commands return version numbers. If any command fails, install that too
 Clone this repository and navigate into it. **All commands in this guide are run from the repository root** unless stated otherwise.
 
 ```bash
-git clone https://github.com/oriolrius/sagemaker-distilgpt2-endpoint.git
-cd sagemaker-distilgpt2-endpoint
+git clone https://github.com/oriolrius/sagemaker-llm-endpoint.git
+cd sagemaker-llm-endpoint
 ```
 
 ### Checkpoint
@@ -660,15 +660,14 @@ curl -X POST <api-gateway-url>/v1/chat/completions \
 
 ### Understanding the Response
 
-The default model is **distilgpt2**, which is a small **base model** (not instruction-tuned). This means:
+The default model is **Qwen/Qwen2.5-1.5B-Instruct**, a 1.5B parameter instruction-tuned model. It can follow instructions, answer questions, write code, and hold conversations in multiple languages.
 
 | Prompt Style | Works? | Example |
 |-------------|--------|---------|
-| Text completion | Yes | `"The capital of France is"` --> `"Paris, the city of..."` |
-| Q&A format | Partial | `"Q: What is AI?\nA:"` --> may continue the pattern |
-| Direct question | No | `"What is AI?"` --> produces random text, not an answer |
-
-This is expected behavior. For conversational responses, you would deploy an instruction-tuned model like `meta-llama/Llama-2-7b-chat-hf` (requires a larger GPU instance and more quota).
+| Direct question | Yes | `"What is AI?"` --> coherent answer |
+| Text completion | Yes | `"The capital of France is"` --> `"Paris..."` |
+| Code generation | Yes | `"Write a Python function..."` --> working code |
+| Multi-turn chat | Yes | Follows conversation context |
 
 ### Checkpoint
 
@@ -936,7 +935,7 @@ torch.cuda.OutOfMemoryError: CUDA out of memory
 
 **Cause:** The model is too large for the GPU memory (16 GB on ml.g4dn.xlarge).
 
-**Fix:** Use a smaller model. The default `distilgpt2` (82M parameters) fits easily. Models larger than ~7B parameters in fp16 will not fit on a T4 GPU.
+**Fix:** Use a smaller model. The default `Qwen/Qwen2.5-1.5B-Instruct` (1.5B parameters, ~3 GB in fp16) fits easily. Models larger than ~7B parameters in fp16 will not fit on a T4 GPU.
 
 #### Endpoint Stuck in "Creating"
 

@@ -21,7 +21,7 @@ pip install -e .
 Deploy a standalone vLLM endpoint (useful for testing/development outside CloudFormation):
 
 ```bash
-# Default: distilgpt2 on ml.g4dn.xlarge
+# Default: Qwen/Qwen2.5-1.5B-Instruct on ml.g4dn.xlarge
 uv run deploy-vllm
 
 # Custom model
@@ -69,7 +69,7 @@ uv run cleanup --all
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `AWS_REGION` | AWS region | `eu-west-1` |
-| `HF_MODEL_ID` | HuggingFace model ID | `distilgpt2` |
+| `HF_MODEL_ID` | HuggingFace model ID | `Qwen/Qwen2.5-1.5B-Instruct` |
 | `INSTANCE_TYPE` | SageMaker instance type | `ml.g4dn.xlarge` |
 | `SAGEMAKER_ROLE_ARN` | IAM role ARN | Auto-detected |
 | `SAGEMAKER_ENDPOINT_NAME` | Endpoint for testing | Auto-detected |
