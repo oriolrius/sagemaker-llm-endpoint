@@ -466,7 +466,7 @@ cd lambda/openai-proxy && uv run pytest -v
 
 **Full details:** [docs/sagemaker_quotas.md](docs/sagemaker_quotas.md)
 
-**Account:** 753916465480 | **Region:** eu-west-1 | **Total Endpoint Instances:** 20
+**Account:** 658203403846 | **Region:** eu-west-1 | **Total Endpoint Instances:** 20
 
 ### Available GPU Instances (Required for vLLM)
 

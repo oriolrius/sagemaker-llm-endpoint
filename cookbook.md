@@ -155,12 +155,67 @@ aws service-quotas list-service-quotas \
 
 ### Request a Quota Increase (if quota is 0)
 
-1. On the Service Quotas page, click the quota name **"ml.g4dn.xlarge for endpoint usage"**
-2. Click **"Request quota increase"** (top-right)
-3. Enter **1** as the new value
-4. Click **"Request"**
+If your quota is 0, you **must** request an increase before deploying. Here is the exact process:
 
-Quota increases for GPU instances typically take **a few hours to 3 business days** to be approved. You cannot proceed with the deployment until the quota is at least 1.
+#### Via AWS Console (Recommended)
+
+1. Open the [Service Quotas console for SageMaker in eu-west-1](https://eu-west-1.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)
+2. In the **search box**, type: `ml.g4dn.xlarge`
+3. Click on the quota name: **"ml.g4dn.xlarge for endpoint usage"**
+4. On the quota detail page, you will see:
+   - **Applied quota value**: `0` (your current limit)
+   - **AWS default quota value**: the default for this region
+5. Click the **"Request increase at account level"** button (orange button, top-right area)
+6. In the **"Increase quota value"** field, enter: `1`
+7. Click **"Request"**
+8. You will see a confirmation banner: *"Quota increase request submitted"*
+
+#### Via AWS CLI
+
+```bash
+# Get the quota code first
+QUOTA_CODE=$(aws service-quotas list-service-quotas \
+  --service-code sagemaker \
+  --region eu-west-1 \
+  --query "Quotas[?contains(QuotaName, 'ml.g4dn.xlarge') && contains(QuotaName, 'endpoint')].QuotaCode" \
+  --output text)
+
+# Request the increase
+aws service-quotas request-service-quota-increase \
+  --service-code sagemaker \
+  --quota-code "$QUOTA_CODE" \
+  --desired-value 1 \
+  --region eu-west-1
+```
+
+#### Check Request Status
+
+Monitor the status of your request:
+
+```bash
+aws service-quotas list-requested-service-quota-change-history \
+  --service-code sagemaker \
+  --region eu-west-1 \
+  --query "RequestedQuotas[?contains(QuotaName, 'g4dn.xlarge')].[QuotaName,Status,DesiredValue]" \
+  --output table
+```
+
+Or in the console: [Service Quotas > Quota request history](https://eu-west-1.console.aws.amazon.com/servicequotas/home/requests)
+
+| Status | Meaning |
+|--------|---------|
+| `PENDING` | AWS is reviewing your request |
+| `CASE_OPENED` | A support case was created -- check your email |
+| `APPROVED` | Quota increased -- you can proceed with deployment |
+| `DENIED` | Request denied -- contact AWS Support with a business justification |
+
+#### Expected Wait Time
+
+- **Sandbox/Lab accounts**: Often approved automatically within minutes to a few hours
+- **New production accounts**: 1-3 business days
+- **Large increases (>4 instances)**: May require a support case with justification
+
+**You cannot proceed with the deployment until the quota is at least 1.** Re-run the quota check command from above to verify after approval.
 
 ---
 

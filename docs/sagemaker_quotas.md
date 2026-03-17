@@ -1,12 +1,12 @@
 # SageMaker Endpoint Quotas - eu-west-1 (Ireland)
 
-**Account:** 753916465480
+**Account:** 658203403846 (DevOps sandbox)
 **Region:** eu-west-1 (Ireland)
 **Last Updated:** 2026-03-17
 **Total Instances Across Active Endpoints:** 20
 
 > **Note:** Pricing shown is approximate SageMaker Real-Time Inference on-demand pricing for eu-west-1.
-> Quotas may differ from eu-north-1. Verify current values in the Service Quotas console.
+> Quotas are per-account and per-region. Always verify current values in the [Service Quotas console](https://eu-west-1.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas).
 > Actual prices may vary. Check [AWS SageMaker Pricing](https://aws.amazon.com/sagemaker/pricing/) for current rates.
 
 ---
@@ -168,11 +168,41 @@ Best for development, testing, and low-traffic workloads. Uses CPU credits for b
 
 ### Requesting Quota Increases
 
-1. Go to **AWS Console** → **Service Quotas** → **Amazon SageMaker**
-2. Search for the instance type (e.g., "ml.g5.xlarge for endpoint usage")
-3. Click **Request quota increase**
-4. Specify the new limit and provide a use case justification
-5. Typical approval time: 1-3 business days
+#### Via AWS Console
+
+1. Open [Service Quotas for SageMaker in eu-west-1](https://eu-west-1.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)
+2. Search for the instance type (e.g., `ml.g4dn.xlarge`)
+3. Click the quota name (e.g., **"ml.g4dn.xlarge for endpoint usage"**)
+4. Click **"Request increase at account level"** (orange button, top-right)
+5. Enter the desired quota value (e.g., `1`)
+6. Click **"Request"**
+
+#### Via AWS CLI
+
+```bash
+# Find the quota code
+QUOTA_CODE=$(aws service-quotas list-service-quotas \
+  --service-code sagemaker --region eu-west-1 \
+  --query "Quotas[?contains(QuotaName, 'g4dn.xlarge') && contains(QuotaName, 'endpoint')].QuotaCode" \
+  --output text)
+
+# Request increase
+aws service-quotas request-service-quota-increase \
+  --service-code sagemaker --quota-code "$QUOTA_CODE" \
+  --desired-value 1 --region eu-west-1
+
+# Check status
+aws service-quotas list-requested-service-quota-change-history \
+  --service-code sagemaker --region eu-west-1 \
+  --query "RequestedQuotas[?contains(QuotaName, 'g4dn')].[QuotaName,Status,DesiredValue]" \
+  --output table
+```
+
+#### Approval Times
+
+- Sandbox/lab accounts: often automatic (minutes to hours)
+- New production accounts: 1-3 business days
+- Large increases: may require support case with justification
 
 ### Cost Optimization Tips
 
