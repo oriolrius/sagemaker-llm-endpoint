@@ -249,7 +249,7 @@ The model is too large for the GPU. The T4 on `ml.g4dn.xlarge` has 16 GB. Models
 
 ```bash
 # Redeploy with a smaller model
-./deploy-full-stack.sh --vpc-id vpc-xxx --subnet-id subnet-xxx --model-id distilgpt2
+./deploy-full-stack.sh --vpc-id vpc-xxx --subnet-id subnet-xxx --model-id Qwen/Qwen2.5-1.5B-Instruct
 
 # Or request quota for a larger instance and redeploy
 ./deploy-full-stack.sh --vpc-id vpc-xxx --subnet-id subnet-xxx --sagemaker-instance ml.g5.xlarge

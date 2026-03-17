@@ -17,7 +17,7 @@ These are the **only instances that support vLLM** inference with the DJL-LMI co
 
 | Instance Type | Quota | Price/Hour | vCPUs | RAM | GPU | GPU Model | GPU Memory | GPU Arch | Notes |
 |---------------|-------|------------|-------|-----|-----|-----------|------------|----------|-------|
-| **ml.g4dn.xlarge** | 1 | ~$0.74 | 4 | 16 GB | 1 | NVIDIA T4 Tensor Core | 16 GB GDDR6 | Turing (SM75) | **Recommended** - Best for distilgpt2, small models |
+| **ml.g4dn.xlarge** | 1 | ~$0.74 | 4 | 16 GB | 1 | NVIDIA T4 Tensor Core | 16 GB GDDR6 | Turing (SM75) | **Recommended** - Best for small models (Qwen2.5-1.5B, TinyLlama, etc.) |
 | **ml.g4dn.2xlarge** | 1 | ~$1.05 | 8 | 32 GB | 1 | NVIDIA T4 Tensor Core | 16 GB GDDR6 | Turing (SM75) | More CPU/RAM for larger models |
 
 ### NVIDIA T4 GPU Specifications
@@ -145,7 +145,7 @@ Best for development, testing, and low-traffic workloads. Uses CPU credits for b
 
 | Instance | Hourly | Daily (24h) | Monthly (720h) | Best For |
 |----------|--------|-------------|----------------|----------|
-| ml.g4dn.xlarge | ~$0.74 | ~$17.76 | ~$533 | Small models (distilgpt2, GPT-2) |
+| ml.g4dn.xlarge | ~$0.74 | ~$17.76 | ~$533 | Small models (Qwen2.5-1.5B, TinyLlama-1.1B) |
 | ml.g4dn.2xlarge | ~$1.05 | ~$25.20 | ~$756 | Medium models, more preprocessing |
 
 ### CPU Instances (Cheapest Available)

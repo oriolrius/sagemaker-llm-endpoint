@@ -15,7 +15,7 @@ Usage:
 
 Environment variables:
     AWS_REGION: AWS region (default: eu-west-1)
-    HF_MODEL_ID: HuggingFace model ID (default: distilgpt2)
+    HF_MODEL_ID: HuggingFace model ID (default: Qwen/Qwen2.5-1.5B-Instruct)
     INSTANCE_TYPE: SageMaker instance type (default: ml.g4dn.xlarge)
     SAGEMAKER_ROLE_ARN: IAM role ARN for SageMaker (auto-detected if not set)
 """
@@ -27,7 +27,7 @@ import boto3
 
 # Configuration
 REGION = os.environ.get("AWS_REGION", "eu-west-1")
-MODEL_ID = os.environ.get("HF_MODEL_ID", "distilgpt2")
+MODEL_ID = os.environ.get("HF_MODEL_ID", "Qwen/Qwen2.5-1.5B-Instruct")
 INSTANCE_TYPE = os.environ.get("INSTANCE_TYPE", "ml.g4dn.xlarge")
 
 # LMI Container image (0.28.0-lmi10.0.0 = vLLM backend)
@@ -127,7 +127,7 @@ def deploy_vllm_endpoint() -> tuple[str, str, str]:
         # vLLM backend configuration
         "OPTION_ROLLING_BATCH": "vllm",
         "OPTION_DTYPE": "fp16",
-        "OPTION_MAX_MODEL_LEN": "1024",  # distilgpt2 max context
+        "OPTION_MAX_MODEL_LEN": "8192",
         "OPTION_TENSOR_PARALLEL_DEGREE": "1",
         # Memory management
         "OPTION_GPU_MEMORY_UTILIZATION": "0.9",

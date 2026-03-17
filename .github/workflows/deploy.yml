@@ -10,7 +10,7 @@ on:
       model_id:
         description: 'HuggingFace model ID'
         type: string
-        default: 'distilgpt2'
+        default: 'Qwen/Qwen2.5-1.5B-Instruct'
       sagemaker_instance:
         description: 'SageMaker instance type'
         type: choice
