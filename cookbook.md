@@ -17,17 +17,18 @@ Browser --> OpenWebUI (EC2) --> API Gateway --> Lambda --> SageMaker vLLM Endpoi
 ## Table of Contents
 
 1. [Prerequisites](#1-prerequisites)
-2. [Configure AWS Credentials](#2-configure-aws-credentials)
-3. [Check GPU Quota](#3-check-gpu-quota)
-4. [Find Your VPC and Subnet](#4-find-your-vpc-and-subnet)
-5. [Run the Lambda Tests](#5-run-the-lambda-tests)
-6. [Deploy the Full Stack](#6-deploy-the-full-stack)
-7. [Monitor the Deployment](#7-monitor-the-deployment)
-8. [Test the API](#8-test-the-api)
-9. [Use the Web Chat Interface](#9-use-the-web-chat-interface)
-10. [Cleanup (Required)](#10-cleanup-required)
-11. [Verify Cleanup](#11-verify-cleanup)
-12. [Troubleshooting](#12-troubleshooting)
+2. [Clone the Repository](#2-clone-the-repository)
+3. [Configure AWS Credentials](#3-configure-aws-credentials)
+4. [Check GPU Quota](#4-check-gpu-quota)
+5. [Find Your VPC and Subnet](#5-find-your-vpc-and-subnet)
+6. [Run the Lambda Tests](#6-run-the-lambda-tests)
+7. [Deploy the Full Stack](#7-deploy-the-full-stack)
+8. [Monitor the Deployment](#8-monitor-the-deployment)
+9. [Test the API](#9-test-the-api)
+10. [Use the Web Chat Interface](#10-use-the-web-chat-interface)
+11. [Cleanup (Required)](#11-cleanup-required)
+12. [Verify Cleanup](#12-verify-cleanup)
+13. [Troubleshooting](#13-troubleshooting)
 
 ---
 
@@ -63,13 +64,45 @@ All five commands return version numbers. If any command fails, install that too
 
 ---
 
-## 2. Configure AWS Credentials
+## 2. Clone the Repository
+
+Clone this repository and navigate into it. **All commands in this guide are run from the repository root** unless stated otherwise.
+
+```bash
+git clone https://github.com/oriolrius/sagemaker-distilgpt2-endpoint.git
+cd sagemaker-distilgpt2-endpoint
+```
+
+### Checkpoint
+
+```bash
+ls infra/full-stack.yaml
+```
+
+This file exists. If not, you are in the wrong directory.
+
+---
+
+## 3. Configure AWS Credentials
 
 AWS CLI needs valid credentials to create resources. These credentials come from your AWS account (typically via AWS SSO or an Innovation Sandbox portal).
 
-### Option A: Configure Credentials Manually
+### Option A: Environment Variables (Recommended for Sandbox/Temporary Credentials)
 
-If you have an AWS Access Key ID, Secret Access Key, and Session Token:
+If you received `export` commands from a sandbox portal or credential provider, paste them directly into your terminal:
+
+```bash
+export AWS_ACCESS_KEY_ID="ASIA..."
+export AWS_SECRET_ACCESS_KEY="..."
+export AWS_SESSION_TOKEN="..."
+export AWS_DEFAULT_REGION="eu-west-1"
+```
+
+These are valid only for the current terminal session. If you close the terminal, you need to set them again.
+
+### Option B: AWS CLI Configuration (Persistent)
+
+If you have an AWS Access Key ID, Secret Access Key, and Session Token and want them saved to disk:
 
 ```bash
 aws configure set aws_access_key_id <YOUR_ACCESS_KEY_ID>
@@ -78,7 +111,9 @@ aws configure set aws_session_token <YOUR_SESSION_TOKEN>
 aws configure set region eu-west-1
 ```
 
-### Option B: AWS SSO Login
+This writes to `~/.aws/credentials` and persists across terminal sessions.
+
+### Option C: AWS SSO Login
 
 If your organization uses AWS SSO (Identity Center):
 
@@ -106,20 +141,20 @@ aws sts get-caller-identity
 ### Checkpoint
 
 - The `get-caller-identity` command returns your Account ID (a 12-digit number)
-- The region is set to `eu-west-1` (verify with `aws configure get region`)
+- The region is set to `eu-west-1` (verify with `aws configure get region` or `echo $AWS_DEFAULT_REGION`)
 - Write down your **Account ID** -- you will need it later
 
 ### If This Fails
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `Unable to locate credentials` | No credentials configured | Run `aws configure` and enter your keys |
+| `Unable to locate credentials` | No credentials configured | Set environment variables (Option A) or run `aws configure` |
 | `ExpiredTokenException` | Session token has expired | Get fresh credentials from your SSO portal |
 | `InvalidClientTokenId` | Wrong access key | Double-check the access key ID is correct |
 
 ---
 
-## 3. Check GPU Quota
+## 4. Check GPU Quota
 
 SageMaker requires a GPU instance to run vLLM. Your AWS account must have quota for at least 1 `ml.g4dn.xlarge` instance in `eu-west-1`. New accounts often have a quota of 0 for GPU instances.
 
@@ -219,15 +254,16 @@ Or in the console: [Service Quotas > Quota request history](https://eu-west-1.co
 
 ---
 
-## 4. Find Your VPC and Subnet
+## 5. Find Your VPC and Subnet
 
-The EC2 instance (which runs the web chat interface) needs a VPC and a **public subnet** to be accessible from the internet.
+The EC2 instance (which runs the web chat interface) needs a VPC and a subnet with a route to the internet.
 
 ### What Are VPCs and Subnets?
 
 - **VPC (Virtual Private Cloud)**: An isolated virtual network in your AWS account
-- **Subnet**: A range of IP addresses within a VPC. A **public subnet** has a route to the internet via an Internet Gateway
-- Every AWS account has a **default VPC** with public subnets -- this is what you should use
+- **Subnet**: A range of IP addresses within a VPC
+- **Internet Gateway (IGW)**: Enables internet access for resources in a VPC
+- The key requirement is that the subnet's **route table** has a route to an Internet Gateway (`0.0.0.0/0` → `igw-xxx`)
 
 ### Find VPC via CLI
 
@@ -237,7 +273,7 @@ aws ec2 describe-vpcs --region eu-west-1 \
   --output table
 ```
 
-**Example output:**
+**Example output (default VPC):**
 
 ```
 -------------------------------------------------------------
@@ -249,46 +285,68 @@ aws ec2 describe-vpcs --region eu-west-1 \
 +----------------+--------+-----------------------+---------+
 ```
 
-Write down the **VPC ID** where `Default` is `True` (e.g., `vpc-0abc123def456789`).
+**Example output (no default VPC — custom VPC only):**
 
-### Find Public Subnet via CLI
+```
+-------------------------------------------------------------
+|                        DescribeVpcs                       |
++----------------+--------+-----------------------+------------------+
+|      CIDR      | Default|          ID           |      Name        |
++----------------+--------+-----------------------+------------------+
+|  10.0.0.0/16   |  False |  vpc-0585686b45f950687|  sagemaker-vpc   |
++----------------+--------+-----------------------+------------------+
+```
+
+Write down the **VPC ID**. If you have a default VPC (`Default: True`), use that one. Otherwise, use whatever VPC is available.
+
+### Find a Subnet with Internet Access
 
 Replace `<your-vpc-id>` with the VPC ID from the previous step:
 
 ```bash
 aws ec2 describe-subnets --region eu-west-1 \
-  --filters \
-    "Name=vpc-id,Values=<your-vpc-id>" \
-    "Name=map-public-ip-on-launch,Values=true" \
-  --query 'Subnets[*].{ID:SubnetId,AZ:AvailabilityZone,CIDR:CidrBlock}' \
+  --filters "Name=vpc-id,Values=<your-vpc-id>" \
+  --query 'Subnets[*].{ID:SubnetId,AZ:AvailabilityZone,CIDR:CidrBlock,AutoPublicIP:MapPublicIpOnLaunch}' \
   --output table
 ```
 
 **Example output:**
 
 ```
-------------------------------------------------------
-|                    DescribeSubnets                  |
-+----------------+-------------------+----------------+
-|       AZ       |        ID         |      CIDR      |
-+----------------+-------------------+----------------+
-|  eu-west-1a   | subnet-0aaa111bbb |  172.31.0.0/20 |
-|  eu-west-1b   | subnet-0bbb222ccc |  172.31.16.0/20|
-|  eu-west-1c   | subnet-0ccc333ddd |  172.31.32.0/20|
-+----------------+-------------------+----------------+
+-----------------------------------------------------------------------
+|                           DescribeSubnets                           |
++---------------+--------------+----------------------------+---------+
+| AutoPublicIP  |     AZ       |            ID              |  CIDR   |
++---------------+--------------+----------------------------+---------+
+|  True         | eu-west-1a   | subnet-0aaa111bbb          | 172...  |
+|  True         | eu-west-1b   | subnet-0bbb222ccc          | 172...  |
++---------------+--------------+----------------------------+---------+
 ```
 
-Write down **any one** of the Subnet IDs (e.g., `subnet-0aaa111bbb`). Any public subnet works.
+Write down **any one** of the Subnet IDs. Any subnet works — the deployment creates an Elastic IP for the EC2 instance, so `AutoPublicIP: False` is acceptable.
+
+### Verify the Subnet Has Internet Access
+
+This is the critical check — the subnet must have a route to an Internet Gateway:
+
+```bash
+# Check if an Internet Gateway is attached to your VPC
+aws ec2 describe-internet-gateways --region eu-west-1 \
+  --filters "Name=attachment.vpc-id,Values=<your-vpc-id>" \
+  --query 'InternetGateways[*].InternetGatewayId' --output text
+```
+
+If this returns an IGW ID (e.g., `igw-0b7276cca4bd4097a`), your VPC has internet access. If it returns nothing, your VPC cannot reach the internet — see [If No Internet Gateway](#if-no-internet-gateway) below.
 
 ### Find VPC and Subnet via AWS Console
 
 1. Open the [VPC Console in eu-west-1](https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#vpcs:)
-2. Look for the VPC where **Default VPC** column shows **Yes**
+2. Pick a VPC — use the **Default VPC** (if one exists) or any other VPC
 3. Copy the **VPC ID**
 4. In the left sidebar, click **Subnets** ([direct link](https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#subnets:))
-5. Click the **gear icon** (top-right of the table) and enable the column **"Auto-assign public IPv4 address"**
-6. Find a subnet where that column shows **Yes** -- this is a public subnet
-7. Copy the **Subnet ID**
+5. Filter by your VPC ID
+6. Copy **any Subnet ID** from the list
+7. Verify internet access: click **Internet Gateways** in the left sidebar and confirm one is attached to your VPC
 
 ### Checkpoint
 
@@ -299,21 +357,23 @@ You now have two values written down:
 | VPC ID | `vpc-0abc123def456789` | _____________ |
 | Subnet ID | `subnet-0aaa111bbb` | _____________ |
 
-Both values are required for the next steps.
+Both values are required for the next steps. You have also confirmed that an Internet Gateway is attached to your VPC.
 
-### If No Public Subnets Appear
+### If No Internet Gateway
 
-This means the VPC has no subnets with internet access. If you are using the **default VPC**, all its subnets should be public. If not:
+Your VPC has no internet access. This is uncommon — default VPCs always have one. If you are using a custom VPC without an IGW:
 
-1. Go to **VPC Console** > **Internet Gateways** -- verify one is attached to your VPC
-2. Go to **Route Tables** -- verify there is a route `0.0.0.0/0` pointing to `igw-xxx`
-3. Go to **Subnets** > select your subnet > **Actions** > **Edit subnet settings** > enable **"Auto-assign public IPv4 address"**
+1. Go to **VPC Console** > **Internet Gateways** > **Create internet gateway**
+2. Select the new IGW > **Actions** > **Attach to VPC** > select your VPC
+3. Go to **Route Tables** > select the route table associated with your subnet
+4. **Edit routes** > add a route: Destination `0.0.0.0/0`, Target: your new IGW
+5. Re-run the verify command above to confirm
 
 ---
 
-## 5. Run the Lambda Tests
+## 6. Run the Lambda Tests
 
-Before deploying to AWS, verify the Lambda proxy code works correctly.
+Before deploying to AWS, verify the Lambda proxy code works correctly. Run from the repository root:
 
 ```bash
 cd lambda/openai-proxy
@@ -343,7 +403,7 @@ tests/test_handler.py::TestCreateResponse::test_custom_headers PASSED
 | `ModuleNotFoundError` | Run `uv sync --dev` again |
 | Test assertion errors | Check that you haven't modified `handler.py` -- run `git checkout lambda/openai-proxy/src/` to reset |
 
-Return to the project root when done:
+Return to the repository root when done:
 
 ```bash
 cd ../..
@@ -351,13 +411,13 @@ cd ../..
 
 ---
 
-## 6. Deploy the Full Stack
+## 7. Deploy the Full Stack
 
 This step packages the Lambda function, uploads it to S3, and deploys all AWS resources via CloudFormation.
 
 ### Run the Deploy Script
 
-Replace the placeholders with your actual values from Step 4:
+Replace the placeholders with your actual values from Step 5:
 
 ```bash
 cd infra/
@@ -378,7 +438,7 @@ cd infra/
 The script will:
 
 1. Show a summary of what will be created
-2. Ask for confirmation (`Continue? [y/N]`) -- type **y** and press Enter
+2. Ask for confirmation (`Continue? [y/N]`) -- press **y** (no Enter needed)
 3. Package the Lambda function (~30 seconds)
 4. Create an S3 bucket and upload files (~30 seconds)
 5. Deploy the CloudFormation stack (~15-20 minutes)
@@ -427,13 +487,13 @@ Write down these values:
 | Error | Cause | Fix |
 |-------|-------|-----|
 | `ERROR: --vpc-id is required` | Missing argument | Add `--vpc-id` with your VPC ID |
-| `ExpiredTokenException` | AWS credentials expired | Refresh credentials (Step 2), then re-run |
+| `ExpiredTokenException` | AWS credentials expired | Refresh credentials (Step 3), then re-run |
 | `zip: command not found` | zip not installed | `sudo apt install zip` |
 | `uv: command not found` | uv not installed | See Step 1 prerequisites |
 
 ---
 
-## 7. Monitor the Deployment
+## 8. Monitor the Deployment
 
 The CloudFormation deployment takes 15-20 minutes. Most of that time is SageMaker provisioning the GPU instance and loading the model. You can monitor progress in real-time.
 
@@ -442,14 +502,22 @@ The CloudFormation deployment takes 15-20 minutes. Most of that time is SageMake
 Watch CloudFormation events in your terminal:
 
 ```bash
+# Using watch (Linux)
 watch -n 10 "aws cloudformation describe-stack-events \
   --stack-name openai-sagemaker-stack \
   --region eu-west-1 \
   --query 'StackEvents[0:5].[Timestamp,LogicalResourceId,ResourceStatus]' \
   --output table"
+
+# If watch is not available (macOS), run manually and repeat:
+aws cloudformation describe-stack-events \
+  --stack-name openai-sagemaker-stack \
+  --region eu-west-1 \
+  --query 'StackEvents[0:5].[Timestamp,LogicalResourceId,ResourceStatus]' \
+  --output table
 ```
 
-Press `Ctrl+C` to stop watching.
+Press `Ctrl+C` to stop watching (if using `watch`).
 
 ### Monitor via AWS Console
 
@@ -485,7 +553,7 @@ aws sagemaker describe-endpoint \
 |--------|---------|
 | `Creating` | Still provisioning -- wait |
 | `InService` | Ready to accept requests |
-| `Failed` | Something went wrong -- see [Troubleshooting](#12-troubleshooting) |
+| `Failed` | Something went wrong -- see [Troubleshooting](#13-troubleshooting) |
 
 You can also check the endpoint in the [SageMaker Console > Inference > Endpoints](https://eu-west-1.console.aws.amazon.com/sagemaker/home?region=eu-west-1#/endpoints).
 
@@ -510,7 +578,7 @@ Common failures and fixes:
 
 | Failed Resource | Error Message | Fix |
 |-----------------|---------------|-----|
-| SageMakerEndpoint | `ResourceLimitExceeded` | GPU quota is 0 -- request increase (Step 3) |
+| SageMakerEndpoint | `ResourceLimitExceeded` | GPU quota is 0 -- request increase (Step 4) |
 | LambdaFunction | `S3 error: Access Denied` | S3 bucket region mismatch -- re-run deploy script |
 | EC2Instance | `not supported` | Instance type unavailable in AZ -- the script uses `t3.small` which works in eu-west-1 |
 | Any IAM resource | `Requires capabilities` | Missing `--capabilities` flag -- the deploy script includes this automatically |
@@ -525,13 +593,13 @@ aws cloudformation wait stack-delete-complete --stack-name openai-sagemaker-stac
 
 ---
 
-## 8. Test the API
+## 9. Test the API
 
 Once the stack is deployed and the SageMaker endpoint is `InService`, test the API.
 
 ### Test 1: List Available Models
 
-Replace `<api-gateway-url>` with your API Gateway URL from Step 6:
+Replace `<api-gateway-url>` with your API Gateway URL from Step 7:
 
 ```bash
 curl <api-gateway-url>/v1/models
@@ -612,20 +680,20 @@ This is expected behavior. For conversational responses, you would deploy an ins
 
 | HTTP Status | Error | Fix |
 |-------------|-------|-----|
-| 500 | `"SageMaker error"` | Endpoint may not be ready -- check status: `aws sagemaker describe-endpoint --endpoint-name openai-sagemaker-stack-vllm-endpoint --query EndpointStatus` |
+| 500 | `"SageMaker error"` | Endpoint may not be ready -- check: `aws sagemaker describe-endpoint --endpoint-name openai-sagemaker-stack-vllm-endpoint --query EndpointStatus` |
 | 504 | Gateway Timeout | Request took too long -- try again (first request after deployment can be slow) |
 | 403 | Forbidden | API Gateway URL is wrong -- check the CloudFormation outputs |
 | Connection refused | Nothing listening | Verify the API Gateway was created: `aws apigatewayv2 get-apis --region eu-west-1` |
 
 ---
 
-## 9. Use the Web Chat Interface
+## 10. Use the Web Chat Interface
 
 OpenWebUI provides a web-based chat interface similar to ChatGPT, connected to your SageMaker model via the API Gateway.
 
 ### Access OpenWebUI
 
-Open your browser and navigate to the OpenWebUI URL from Step 6:
+Open your browser and navigate to the OpenWebUI URL from Step 7:
 
 ```
 http://<ec2-public-ip>
@@ -685,7 +753,7 @@ This log shows every command that ran during EC2 startup, including any errors f
 
 ---
 
-## 10. Cleanup (Required)
+## 11. Cleanup (Required)
 
 **This stack costs ~$0.76/hour (~$18/day)**. The SageMaker GPU instance is the primary cost driver. Always delete all resources when you are done.
 
@@ -698,7 +766,7 @@ cd infra/
 
 The script will:
 1. Show what will be deleted
-2. Ask for confirmation (`Are you sure? [y/N]`) -- type **y** and press Enter
+2. Ask for confirmation -- press **y** to confirm
 3. Delete the CloudFormation stack (5-10 minutes)
 4. Delete the S3 bucket
 5. Confirm cleanup is complete
@@ -728,7 +796,7 @@ aws s3 rb s3://<bucket-name> --force --region eu-west-1
 
 ---
 
-## 11. Verify Cleanup
+## 12. Verify Cleanup
 
 Confirm that no billable resources remain. Run each of these commands and verify they return empty results.
 
@@ -785,7 +853,7 @@ All five commands return empty results. **No ongoing charges.**
 
 ---
 
-## 12. Troubleshooting
+## 13. Troubleshooting
 
 ### Quick Diagnostic Reference
 
@@ -856,7 +924,7 @@ The account-level service limit 'ml.g4dn.xlarge for endpoint usage' is 0 Instanc
 
 **Cause:** Your account has zero quota for this GPU instance type.
 
-**Fix:** Request a quota increase (Step 3). You cannot deploy until the quota is at least 1.
+**Fix:** Request a quota increase (Step 4). You cannot deploy until the quota is at least 1.
 
 #### CUDA Out of Memory
 
