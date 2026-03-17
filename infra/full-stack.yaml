@@ -344,7 +344,9 @@ Resources:
     DependsOn: HttpApi
     Properties:
       InstanceType: !Ref EC2InstanceType
-      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64}}'
+      # Hardcoded AL2023 AMI for sandbox environments lacking ssm:GetParameters
+      # To revert: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64}}'
+      ImageId: ami-0d1b55a6d77a0c326
       SubnetId: !Ref SubnetId
       SecurityGroupIds:
         - !Ref EC2SecurityGroup
