@@ -16,7 +16,7 @@ uv sync --dev
 uv run pytest -v
 ```
 
-**Expected:** All tests pass (14 tests covering routing, CORS, JSON parsing, response formatting, error handling). SageMaker calls are mocked -- this only validates code logic.
+**Expected:** All tests pass (19 tests covering routing, CORS, JSON parsing, response formatting, error handling). SageMaker calls are mocked -- this only validates code logic.
 
 ```
 tests/test_handler.py::TestCreateResponse::test_basic_response PASSED
