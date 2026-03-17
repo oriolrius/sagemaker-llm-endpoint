@@ -8,7 +8,7 @@ Parameters:
   # Model Configuration
   HuggingFaceModelId:
     Type: String
-    Default: distilgpt2
+    Default: Qwen/Qwen2.5-1.5B-Instruct
     Description: HuggingFace model ID to deploy
 
   SageMakerInstanceType:

@@ -23,7 +23,7 @@ set -e
 
 # Defaults
 STACK_NAME="openai-sagemaker-stack"
-MODEL_ID="distilgpt2"
+MODEL_ID="Qwen/Qwen2.5-1.5B-Instruct"
 REGION="${AWS_REGION:-eu-west-1}"
 SAGEMAKER_INSTANCE="ml.g4dn.xlarge"
 EC2_INSTANCE="t3.small"
