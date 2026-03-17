@@ -48,7 +48,7 @@ uv run test-endpoint
 Test the API Gateway + Lambda proxy:
 
 ```bash
-uv run python -m sagemaker_tools.test_api_gateway https://abc123.execute-api.eu-north-1.amazonaws.com
+uv run python -m sagemaker_tools.test_api_gateway https://abc123.execute-api.eu-west-1.amazonaws.com
 ```
 
 ### Cleanup Resources
@@ -68,7 +68,7 @@ uv run cleanup --all
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `AWS_REGION` | AWS region | `eu-north-1` |
+| `AWS_REGION` | AWS region | `eu-west-1` |
 | `HF_MODEL_ID` | HuggingFace model ID | `distilgpt2` |
 | `INSTANCE_TYPE` | SageMaker instance type | `ml.g4dn.xlarge` |
 | `SAGEMAKER_ROLE_ARN` | IAM role ARN | Auto-detected |

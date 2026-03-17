@@ -6,7 +6,7 @@
 #
 # Usage:
 #   # With API Gateway URL
-#   OPENAI_API_BASE_URL=https://abc123.execute-api.eu-north-1.amazonaws.com ./setup.sh
+#   OPENAI_API_BASE_URL=https://abc123.execute-api.eu-west-1.amazonaws.com ./setup.sh
 #
 #   # Or set in .env file
 #   ./setup.sh

@@ -9,7 +9,7 @@ Usage:
     uv run python -m sagemaker_tools.test_api_gateway <api-gateway-url>
 
     # Example:
-    uv run python -m sagemaker_tools.test_api_gateway https://abc123.execute-api.eu-north-1.amazonaws.com
+    uv run python -m sagemaker_tools.test_api_gateway https://abc123.execute-api.eu-west-1.amazonaws.com
 """
 
 import json
@@ -140,7 +140,7 @@ def main():
         print("Usage: python -m sagemaker_tools.test_api_gateway <api-gateway-url>")
         print()
         print("Example:")
-        print("  python -m sagemaker_tools.test_api_gateway https://abc123.execute-api.eu-north-1.amazonaws.com")
+        print("  python -m sagemaker_tools.test_api_gateway https://abc123.execute-api.eu-west-1.amazonaws.com")
         sys.exit(1)
 
     base_url = sys.argv[1]

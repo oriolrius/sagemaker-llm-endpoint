@@ -93,7 +93,7 @@ Claude Code provides two specialized skills for managing AWS credentials:
 AWS_ACCESS_KEY_ID       # IAM access key
 AWS_SECRET_ACCESS_KEY   # IAM secret key
 AWS_SESSION_TOKEN       # Session token (required for sandbox/STS)
-AWS_REGION              # Default: eu-north-1
+AWS_REGION              # Default: eu-west-1
 ```
 
 **For Lambda Runtime:**
@@ -106,7 +106,7 @@ SAGEMAKER_ENDPOINT_NAME # Name of the SageMaker endpoint to invoke
 After setting up credentials, always verify:
 ```bash
 aws sts get-caller-identity
-aws sagemaker list-endpoints --region eu-north-1
+aws sagemaker list-endpoints --region eu-west-1
 ```
 
 ---
@@ -351,10 +351,10 @@ cz bump                                # Bump version based on commits
 /aws-credentials-setup
 
 # 2. Find your VPC and subnet
-aws ec2 describe-vpcs --region eu-north-1 \
+aws ec2 describe-vpcs --region eu-west-1 \
   --query 'Vpcs[*].[VpcId,Tags[?Key==`Name`].Value|[0]]' --output table
 
-aws ec2 describe-subnets --region eu-north-1 \
+aws ec2 describe-subnets --region eu-west-1 \
   --filters Name=vpc-id,Values=<vpc-id> \
   --query 'Subnets[?MapPublicIpOnLaunch==`true`].[SubnetId,AvailabilityZone]' --output table
 
@@ -400,7 +400,7 @@ uv run test-api-gateway --api-url <url>
 ```bash
 # Via script
 cd infra/
-./delete-full-stack.sh --stack-name openai-sagemaker-stack --region eu-north-1
+./delete-full-stack.sh --stack-name openai-sagemaker-stack --region eu-west-1
 
 # Or via GitHub Actions (requires typing "DESTROY")
 ```
@@ -462,11 +462,11 @@ cd lambda/openai-proxy && uv run pytest -v
 
 ---
 
-## SageMaker Endpoint Quotas (eu-north-1)
+## SageMaker Endpoint Quotas (eu-west-1)
 
 **Full details:** [docs/sagemaker_quotas.md](docs/sagemaker_quotas.md)
 
-**Account:** 753916465480 | **Region:** eu-north-1 | **Total Endpoint Instances:** 20
+**Account:** 753916465480 | **Region:** eu-west-1 | **Total Endpoint Instances:** 20
 
 ### Available GPU Instances (Required for vLLM)
 

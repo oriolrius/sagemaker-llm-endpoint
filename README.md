@@ -38,10 +38,10 @@ Deploy a HuggingFace model on AWS SageMaker with vLLM, exposed via an OpenAI-com
 cd infra/
 
 # Find your VPC and subnet
-aws ec2 describe-vpcs --region eu-north-1 \
+aws ec2 describe-vpcs --region eu-west-1 \
   --query 'Vpcs[*].[VpcId,Tags[?Key==`Name`].Value|[0]]' --output table
 
-aws ec2 describe-subnets --region eu-north-1 \
+aws ec2 describe-subnets --region eu-west-1 \
   --filters Name=vpc-id,Values=<vpc-id> \
   --query 'Subnets[?MapPublicIpOnLaunch==`true`].[SubnetId,AvailabilityZone]' --output table
 
@@ -57,7 +57,7 @@ Deployment takes ~15-20 minutes (mostly SageMaker endpoint startup).
 
 After deployment:
 - **OpenWebUI**: `http://<ec2-elastic-ip>` (shown in output)
-- **API**: `https://<api-id>.execute-api.eu-north-1.amazonaws.com`
+- **API**: `https://<api-id>.execute-api.eu-west-1.amazonaws.com`
 
 ### Test API
 
@@ -182,7 +182,7 @@ uv run deploy-vllm
 uv run test-endpoint <endpoint-name>
 
 # Test API Gateway
-uv run python -m sagemaker_tools.test_api_gateway https://abc123.execute-api.eu-north-1.amazonaws.com
+uv run python -m sagemaker_tools.test_api_gateway https://abc123.execute-api.eu-west-1.amazonaws.com
 
 # Cleanup
 uv run cleanup <endpoint-name>

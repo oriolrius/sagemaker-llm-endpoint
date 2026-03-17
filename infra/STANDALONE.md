@@ -42,7 +42,7 @@ Deploy the full stack as an independent, self-contained environment. This mode c
 | `--sagemaker-instance` | ml.g4dn.xlarge | GPU instance type |
 | `--ec2-instance` | t3.small | EC2 instance type |
 | `--key-pair` | - | EC2 key pair for SSH |
-| `--region` | eu-north-1 | AWS region |
+| `--region` | eu-west-1 | AWS region |
 
 ## When to Use Standalone Mode
 

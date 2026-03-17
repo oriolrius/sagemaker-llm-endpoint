@@ -12,7 +12,7 @@
 #   --stack-name    CloudFormation stack name (default: openai-sagemaker-stack)
 #   --model-id      HuggingFace model ID (default: distilgpt2)
 #   --key-pair      EC2 Key Pair name for SSH access
-#   --region        AWS region (default: eu-north-1)
+#   --region        AWS region (default: eu-west-1)
 #   --external-sagemaker-role-arn  Use existing SageMaker role (for Domain integration)
 #
 # Prerequisites:
@@ -24,7 +24,7 @@ set -e
 # Defaults
 STACK_NAME="openai-sagemaker-stack"
 MODEL_ID="distilgpt2"
-REGION="${AWS_REGION:-eu-north-1}"
+REGION="${AWS_REGION:-eu-west-1}"
 SAGEMAKER_INSTANCE="ml.g4dn.xlarge"
 EC2_INSTANCE="t3.small"
 KEY_PAIR=""
@@ -87,7 +87,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --stack-name          Stack name (default: openai-sagemaker-stack)"
             echo "  --model-id            HuggingFace model (default: distilgpt2)"
             echo "  --key-pair            EC2 Key Pair for SSH"
-            echo "  --region              AWS region (default: eu-north-1)"
+            echo "  --region              AWS region (default: eu-west-1)"
             echo "  --sagemaker-instance  SageMaker instance (default: ml.g4dn.xlarge)"
             echo "  --ec2-instance        EC2 instance (default: t3.small)"
             echo "  --lambda-s3-bucket    S3 bucket for Lambda code (auto-created if not specified)"

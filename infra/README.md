@@ -70,11 +70,11 @@ ROLE_ARN=$(aws sagemaker describe-domain \
 
 ```bash
 # List VPCs
-aws ec2 describe-vpcs --region eu-north-1 \
+aws ec2 describe-vpcs --region eu-west-1 \
   --query 'Vpcs[*].[VpcId,Tags[?Key==`Name`].Value|[0]]' --output table
 
 # List public subnets
-aws ec2 describe-subnets --region eu-north-1 \
+aws ec2 describe-subnets --region eu-west-1 \
   --filters Name=vpc-id,Values=vpc-xxx \
   --query 'Subnets[?MapPublicIpOnLaunch==`true`].[SubnetId,AvailabilityZone]' --output table
 ```
@@ -90,7 +90,7 @@ aws ec2 describe-subnets --region eu-north-1 \
 | `--sagemaker-instance` | ml.g4dn.xlarge | GPU instance type |
 | `--ec2-instance` | t3.small | EC2 instance type |
 | `--key-pair` | - | EC2 key pair for SSH |
-| `--region` | eu-north-1 | AWS region |
+| `--region` | eu-west-1 | AWS region |
 | `--external-sagemaker-role-arn` | - | Use existing SageMaker role (integrated mode) |
 | `--lambda-s3-bucket` | auto-created | S3 bucket for Lambda artifacts |
 

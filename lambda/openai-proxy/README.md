@@ -61,7 +61,7 @@ lambda/openai-proxy/
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `SAGEMAKER_ENDPOINT_NAME` | SageMaker endpoint name | Required |
-| `AWS_REGION` | AWS region | `eu-north-1` |
+| `AWS_REGION` | AWS region | `eu-west-1` |
 
 ## Local Testing
 

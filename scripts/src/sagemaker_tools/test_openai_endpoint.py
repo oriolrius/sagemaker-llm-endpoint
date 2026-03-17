@@ -23,7 +23,7 @@ from typing import Generator
 
 import boto3
 
-REGION = os.environ.get("AWS_REGION", "eu-north-1")
+REGION = os.environ.get("AWS_REGION", "eu-west-1")
 
 
 class SageMakerOpenAIClient:

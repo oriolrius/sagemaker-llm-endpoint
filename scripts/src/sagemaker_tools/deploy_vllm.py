@@ -14,7 +14,7 @@ Usage:
     python -m sagemaker_tools.deploy_vllm
 
 Environment variables:
-    AWS_REGION: AWS region (default: eu-north-1)
+    AWS_REGION: AWS region (default: eu-west-1)
     HF_MODEL_ID: HuggingFace model ID (default: distilgpt2)
     INSTANCE_TYPE: SageMaker instance type (default: ml.g4dn.xlarge)
     SAGEMAKER_ROLE_ARN: IAM role ARN for SageMaker (auto-detected if not set)
@@ -26,7 +26,7 @@ from datetime import datetime
 import boto3
 
 # Configuration
-REGION = os.environ.get("AWS_REGION", "eu-north-1")
+REGION = os.environ.get("AWS_REGION", "eu-west-1")
 MODEL_ID = os.environ.get("HF_MODEL_ID", "distilgpt2")
 INSTANCE_TYPE = os.environ.get("INSTANCE_TYPE", "ml.g4dn.xlarge")
 

@@ -107,7 +107,7 @@ The [sg-finetune](https://github.com/oriolrius/sg-finetune) project provides a S
 # Get role from sg-finetune stack
 ROLE_ARN=$(aws cloudformation describe-stacks \
   --stack-name sg-finetune-sagemaker-domain \
-  --region eu-north-1 \
+  --region eu-west-1 \
   --query 'Stacks[0].Outputs[?OutputKey==`ExecutionRoleArn`].OutputValue' \
   --output text)
 
@@ -117,7 +117,7 @@ ROLE_ARN=$(aws cloudformation describe-stacks \
   --subnet-id subnet-0be946f5bcf8899a1 \
   --external-sagemaker-role-arn "$ROLE_ARN" \
   --stack-name openai-sagemaker-integrated \
-  --region eu-north-1
+  --region eu-west-1
 ```
 
 ## Verifying Integration

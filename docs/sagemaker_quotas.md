@@ -1,11 +1,12 @@
-# SageMaker Endpoint Quotas - eu-north-1 (Stockholm)
+# SageMaker Endpoint Quotas - eu-west-1 (Ireland)
 
 **Account:** 753916465480
-**Region:** eu-north-1 (Stockholm)
-**Last Updated:** 2026-01-22
+**Region:** eu-west-1 (Ireland)
+**Last Updated:** 2026-03-17
 **Total Instances Across Active Endpoints:** 20
 
-> **Note:** Pricing shown is approximate SageMaker Real-Time Inference on-demand pricing for eu-north-1.
+> **Note:** Pricing shown is approximate SageMaker Real-Time Inference on-demand pricing for eu-west-1.
+> Quotas may differ from eu-north-1. Verify current values in the Service Quotas console.
 > Actual prices may vary. Check [AWS SageMaker Pricing](https://aws.amazon.com/sagemaker/pricing/) for current rates.
 
 ---

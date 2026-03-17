@@ -23,7 +23,7 @@ import time
 import boto3
 from botocore.exceptions import ClientError
 
-REGION = os.environ.get("AWS_REGION", "eu-north-1")
+REGION = os.environ.get("AWS_REGION", "eu-west-1")
 
 
 def delete_endpoint(endpoint_name: str, sm_client) -> bool:

@@ -75,7 +75,7 @@ If you have an AWS Access Key ID, Secret Access Key, and Session Token:
 aws configure set aws_access_key_id <YOUR_ACCESS_KEY_ID>
 aws configure set aws_secret_access_key <YOUR_SECRET_ACCESS_KEY>
 aws configure set aws_session_token <YOUR_SESSION_TOKEN>
-aws configure set region eu-north-1
+aws configure set region eu-west-1
 ```
 
 ### Option B: AWS SSO Login
@@ -106,7 +106,7 @@ aws sts get-caller-identity
 ### Checkpoint
 
 - The `get-caller-identity` command returns your Account ID (a 12-digit number)
-- The region is set to `eu-north-1` (verify with `aws configure get region`)
+- The region is set to `eu-west-1` (verify with `aws configure get region`)
 - Write down your **Account ID** -- you will need it later
 
 ### If This Fails
@@ -121,14 +121,14 @@ aws sts get-caller-identity
 
 ## 3. Check GPU Quota
 
-SageMaker requires a GPU instance to run vLLM. Your AWS account must have quota for at least 1 `ml.g4dn.xlarge` instance in `eu-north-1`. New accounts often have a quota of 0 for GPU instances.
+SageMaker requires a GPU instance to run vLLM. Your AWS account must have quota for at least 1 `ml.g4dn.xlarge` instance in `eu-west-1`. New accounts often have a quota of 0 for GPU instances.
 
 ### Check via AWS CLI
 
 ```bash
 aws service-quotas list-service-quotas \
   --service-code sagemaker \
-  --region eu-north-1 \
+  --region eu-west-1 \
   --query "Quotas[?contains(QuotaName, 'ml.g4dn.xlarge') && contains(QuotaName, 'endpoint')].[QuotaName,Value]" \
   --output table
 ```
@@ -143,7 +143,7 @@ aws service-quotas list-service-quotas \
 
 ### Check via AWS Console
 
-1. Open the [Service Quotas console for SageMaker in eu-north-1](https://eu-north-1.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)
+1. Open the [Service Quotas console for SageMaker in eu-west-1](https://eu-west-1.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas)
 2. In the search box, type `ml.g4dn.xlarge`
 3. Find the row **"ml.g4dn.xlarge for endpoint usage"**
 4. Check the **Applied quota value** column
@@ -177,7 +177,7 @@ The EC2 instance (which runs the web chat interface) needs a VPC and a **public 
 ### Find VPC via CLI
 
 ```bash
-aws ec2 describe-vpcs --region eu-north-1 \
+aws ec2 describe-vpcs --region eu-west-1 \
   --query 'Vpcs[*].{ID:VpcId,Name:Tags[?Key==`Name`].Value|[0],CIDR:CidrBlock,Default:IsDefault}' \
   --output table
 ```
@@ -201,7 +201,7 @@ Write down the **VPC ID** where `Default` is `True` (e.g., `vpc-0abc123def456789
 Replace `<your-vpc-id>` with the VPC ID from the previous step:
 
 ```bash
-aws ec2 describe-subnets --region eu-north-1 \
+aws ec2 describe-subnets --region eu-west-1 \
   --filters \
     "Name=vpc-id,Values=<your-vpc-id>" \
     "Name=map-public-ip-on-launch,Values=true" \
@@ -217,9 +217,9 @@ aws ec2 describe-subnets --region eu-north-1 \
 +----------------+-------------------+----------------+
 |       AZ       |        ID         |      CIDR      |
 +----------------+-------------------+----------------+
-|  eu-north-1a   | subnet-0aaa111bbb |  172.31.0.0/20 |
-|  eu-north-1b   | subnet-0bbb222ccc |  172.31.16.0/20|
-|  eu-north-1c   | subnet-0ccc333ddd |  172.31.32.0/20|
+|  eu-west-1a   | subnet-0aaa111bbb |  172.31.0.0/20 |
+|  eu-west-1b   | subnet-0bbb222ccc |  172.31.16.0/20|
+|  eu-west-1c   | subnet-0ccc333ddd |  172.31.32.0/20|
 +----------------+-------------------+----------------+
 ```
 
@@ -227,10 +227,10 @@ Write down **any one** of the Subnet IDs (e.g., `subnet-0aaa111bbb`). Any public
 
 ### Find VPC and Subnet via AWS Console
 
-1. Open the [VPC Console in eu-north-1](https://eu-north-1.console.aws.amazon.com/vpc/home?region=eu-north-1#vpcs:)
+1. Open the [VPC Console in eu-west-1](https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#vpcs:)
 2. Look for the VPC where **Default VPC** column shows **Yes**
 3. Copy the **VPC ID**
-4. In the left sidebar, click **Subnets** ([direct link](https://eu-north-1.console.aws.amazon.com/vpc/home?region=eu-north-1#subnets:))
+4. In the left sidebar, click **Subnets** ([direct link](https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#subnets:))
 5. Click the **gear icon** (top-right of the table) and enable the column **"Auto-assign public IPv4 address"**
 6. Find a subnet where that column shows **Yes** -- this is a public subnet
 7. Copy the **Subnet ID**
@@ -354,7 +354,7 @@ Deployment Complete!
 ============================================
 
 SageMaker Endpoint: openai-sagemaker-stack-vllm-endpoint
-API Gateway:        https://abc123xyz.execute-api.eu-north-1.amazonaws.com
+API Gateway:        https://abc123xyz.execute-api.eu-west-1.amazonaws.com
 OpenWebUI:          http://13.48.xxx.xxx
 EC2 Public IP:      13.48.xxx.xxx
 ```
@@ -389,7 +389,7 @@ Watch CloudFormation events in your terminal:
 ```bash
 watch -n 10 "aws cloudformation describe-stack-events \
   --stack-name openai-sagemaker-stack \
-  --region eu-north-1 \
+  --region eu-west-1 \
   --query 'StackEvents[0:5].[Timestamp,LogicalResourceId,ResourceStatus]' \
   --output table"
 ```
@@ -398,7 +398,7 @@ Press `Ctrl+C` to stop watching.
 
 ### Monitor via AWS Console
 
-1. Open the [CloudFormation console in eu-north-1](https://eu-north-1.console.aws.amazon.com/cloudformation/home?region=eu-north-1#/stacks)
+1. Open the [CloudFormation console in eu-west-1](https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks)
 2. Click your stack name (**openai-sagemaker-stack**)
 3. Click the **Events** tab
 4. The page auto-refreshes. Watch for resources transitioning from `CREATE_IN_PROGRESS` to `CREATE_COMPLETE`
@@ -422,7 +422,7 @@ The SageMaker endpoint is the slowest resource. To check its status directly:
 ```bash
 aws sagemaker describe-endpoint \
   --endpoint-name openai-sagemaker-stack-vllm-endpoint \
-  --region eu-north-1 \
+  --region eu-west-1 \
   --query 'EndpointStatus'
 ```
 
@@ -432,7 +432,7 @@ aws sagemaker describe-endpoint \
 | `InService` | Ready to accept requests |
 | `Failed` | Something went wrong -- see [Troubleshooting](#12-troubleshooting) |
 
-You can also check the endpoint in the [SageMaker Console > Inference > Endpoints](https://eu-north-1.console.aws.amazon.com/sagemaker/home?region=eu-north-1#/endpoints).
+You can also check the endpoint in the [SageMaker Console > Inference > Endpoints](https://eu-west-1.console.aws.amazon.com/sagemaker/home?region=eu-west-1#/endpoints).
 
 ### Checkpoint
 
@@ -446,7 +446,7 @@ Find the root cause by looking for the first `CREATE_FAILED` event:
 ```bash
 aws cloudformation describe-stack-events \
   --stack-name openai-sagemaker-stack \
-  --region eu-north-1 \
+  --region eu-west-1 \
   --query "StackEvents[?ResourceStatus=='CREATE_FAILED'].[LogicalResourceId,ResourceStatusReason]" \
   --output table
 ```
@@ -457,14 +457,14 @@ Common failures and fixes:
 |-----------------|---------------|-----|
 | SageMakerEndpoint | `ResourceLimitExceeded` | GPU quota is 0 -- request increase (Step 3) |
 | LambdaFunction | `S3 error: Access Denied` | S3 bucket region mismatch -- re-run deploy script |
-| EC2Instance | `not supported` | Instance type unavailable in AZ -- the script uses `t3.small` which works in eu-north-1 |
+| EC2Instance | `not supported` | Instance type unavailable in AZ -- the script uses `t3.small` which works in eu-west-1 |
 | Any IAM resource | `Requires capabilities` | Missing `--capabilities` flag -- the deploy script includes this automatically |
 
 After fixing the issue, delete the failed stack and redeploy:
 
 ```bash
-aws cloudformation delete-stack --stack-name openai-sagemaker-stack --region eu-north-1
-aws cloudformation wait stack-delete-complete --stack-name openai-sagemaker-stack --region eu-north-1
+aws cloudformation delete-stack --stack-name openai-sagemaker-stack --region eu-west-1
+aws cloudformation wait stack-delete-complete --stack-name openai-sagemaker-stack --region eu-west-1
 # Then re-run the deploy script
 ```
 
@@ -560,7 +560,7 @@ This is expected behavior. For conversational responses, you would deploy an ins
 | 500 | `"SageMaker error"` | Endpoint may not be ready -- check status: `aws sagemaker describe-endpoint --endpoint-name openai-sagemaker-stack-vllm-endpoint --query EndpointStatus` |
 | 504 | Gateway Timeout | Request took too long -- try again (first request after deployment can be slow) |
 | 403 | Forbidden | API Gateway URL is wrong -- check the CloudFormation outputs |
-| Connection refused | Nothing listening | Verify the API Gateway was created: `aws apigatewayv2 get-apis --region eu-north-1` |
+| Connection refused | Nothing listening | Verify the API Gateway was created: `aws apigatewayv2 get-apis --region eu-west-1` |
 
 ---
 
@@ -606,7 +606,7 @@ The EC2 instance takes 2-3 minutes after the stack completes to finish installin
 
 Option 1 -- Via AWS Systems Manager (no SSH key needed):
 
-1. Open the [EC2 Console](https://eu-north-1.console.aws.amazon.com/ec2/home?region=eu-north-1#Instances)
+1. Open the [EC2 Console](https://eu-west-1.console.aws.amazon.com/ec2/home?region=eu-west-1#Instances)
 2. Select the instance named `openai-sagemaker-stack-openwebui`
 3. Click **Connect** (top button)
 4. Click the **Session Manager** tab
@@ -638,7 +638,7 @@ This log shows every command that ran during EC2 startup, including any errors f
 
 ```bash
 cd infra/
-./delete-full-stack.sh --stack-name openai-sagemaker-stack --region eu-north-1
+./delete-full-stack.sh --stack-name openai-sagemaker-stack --region eu-west-1
 ```
 
 The script will:
@@ -650,7 +650,7 @@ The script will:
 
 ### Delete via AWS Console
 
-1. Open the [CloudFormation console](https://eu-north-1.console.aws.amazon.com/cloudformation/home?region=eu-north-1#/stacks)
+1. Open the [CloudFormation console](https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks)
 2. Select your stack (**openai-sagemaker-stack**)
 3. Click **Delete**
 4. Confirm the deletion
@@ -663,7 +663,7 @@ Then delete the S3 bucket manually:
 aws s3 ls | grep openai-sagemaker-stack
 
 # Empty and delete it
-aws s3 rb s3://<bucket-name> --force --region eu-north-1
+aws s3 rb s3://<bucket-name> --force --region eu-west-1
 ```
 
 ### Checkpoint
@@ -680,7 +680,7 @@ Confirm that no billable resources remain. Run each of these commands and verify
 ### CloudFormation Stack
 
 ```bash
-aws cloudformation describe-stacks --region eu-north-1 \
+aws cloudformation describe-stacks --region eu-west-1 \
   --stack-name openai-sagemaker-stack 2>&1
 ```
 
@@ -689,7 +689,7 @@ aws cloudformation describe-stacks --region eu-north-1 \
 ### SageMaker Endpoints
 
 ```bash
-aws sagemaker list-endpoints --region eu-north-1 \
+aws sagemaker list-endpoints --region eu-west-1 \
   --query 'Endpoints[?contains(EndpointName, `openai-sagemaker-stack`)]'
 ```
 
@@ -698,7 +698,7 @@ aws sagemaker list-endpoints --region eu-north-1 \
 ### Lambda Functions
 
 ```bash
-aws lambda list-functions --region eu-north-1 \
+aws lambda list-functions --region eu-west-1 \
   --query 'Functions[?contains(FunctionName, `openai-sagemaker-stack`)]'
 ```
 
@@ -707,7 +707,7 @@ aws lambda list-functions --region eu-north-1 \
 ### EC2 Instances
 
 ```bash
-aws ec2 describe-instances --region eu-north-1 \
+aws ec2 describe-instances --region eu-west-1 \
   --filters "Name=tag:Name,Values=*openai-sagemaker-stack*" \
   --query 'Reservations[*].Instances[?State.Name!=`terminated`].[InstanceId,State.Name]' \
   --output table
@@ -718,7 +718,7 @@ aws ec2 describe-instances --region eu-north-1 \
 ### API Gateways
 
 ```bash
-aws apigatewayv2 get-apis --region eu-north-1 \
+aws apigatewayv2 get-apis --region eu-west-1 \
   --query 'Items[?contains(Name, `openai-sagemaker-stack`)]'
 ```
 
@@ -740,7 +740,7 @@ All five commands return empty results. **No ongoing charges.**
 | SageMaker endpoint not working | `aws sagemaker describe-endpoint --endpoint-name openai-sagemaker-stack-vllm-endpoint --query '[EndpointStatus,FailureReason]'` |
 | SageMaker container errors | `aws logs tail /aws/sagemaker/Endpoints/openai-sagemaker-stack-vllm-endpoint --follow` |
 | Lambda returning 500 errors | `aws logs filter-log-events --log-group-name /aws/lambda/openai-sagemaker-stack-openai-proxy --filter-pattern "ERROR"` |
-| EC2 setup script failed | `aws ec2 get-console-output --instance-id <instance-id> --region eu-north-1 --latest --query 'Output' --output text` |
+| EC2 setup script failed | `aws ec2 get-console-output --instance-id <instance-id> --region eu-west-1 --latest --query 'Output' --output text` |
 | Any AWS error | `aws sts get-caller-identity` (check credentials first) |
 
 ---
@@ -783,10 +783,10 @@ Could not resolve endpoint / Endpoint ... not found
 
 **Cause:** The AWS CLI is configured for a different region than where your resources exist.
 
-**Fix:** Always specify `--region eu-north-1` in commands, or set:
+**Fix:** Always specify `--region eu-west-1` in commands, or set:
 
 ```bash
-export AWS_DEFAULT_REGION=eu-north-1
+export AWS_DEFAULT_REGION=eu-west-1
 ```
 
 ---
@@ -847,8 +847,8 @@ aws cloudformation describe-stack-events \
 After the rollback completes (`ROLLBACK_COMPLETE`), fix the underlying issue and deploy again. The failed stack remains in `ROLLBACK_COMPLETE` state -- delete it first:
 
 ```bash
-aws cloudformation delete-stack --stack-name openai-sagemaker-stack --region eu-north-1
-aws cloudformation wait stack-delete-complete --stack-name openai-sagemaker-stack --region eu-north-1
+aws cloudformation delete-stack --stack-name openai-sagemaker-stack --region eu-west-1
+aws cloudformation wait stack-delete-complete --stack-name openai-sagemaker-stack --region eu-west-1
 ```
 
 Then re-run the deploy script.
@@ -863,7 +863,7 @@ DELETE_FAILED: The bucket you tried to delete is not empty
 
 ```bash
 aws s3 rm s3://<bucket-name> --recursive
-aws cloudformation delete-stack --stack-name openai-sagemaker-stack --region eu-north-1
+aws cloudformation delete-stack --stack-name openai-sagemaker-stack --region eu-west-1
 ```
 
 ---
@@ -886,7 +886,7 @@ aws cloudformation delete-stack --stack-name openai-sagemaker-stack --region eu-
 aws logs tail /aws/lambda/openai-sagemaker-stack-openai-proxy --since 5m
 ```
 
-Or in the [Lambda Console](https://eu-north-1.console.aws.amazon.com/lambda/home?region=eu-north-1#/functions) > click your function > **Monitor** tab > **View CloudWatch logs**.
+Or in the [Lambda Console](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions) > click your function > **Monitor** tab > **View CloudWatch logs**.
 
 ---
 
@@ -921,19 +921,19 @@ sudo docker-compose -f /opt/openwebui/docker-compose.yml logs
 sudo docker exec openwebui env | grep OPENAI
 ```
 
-The value should match your API Gateway URL with `/v1` appended: `https://abc123.execute-api.eu-north-1.amazonaws.com/v1`.
+The value should match your API Gateway URL with `/v1` appended: `https://abc123.execute-api.eu-west-1.amazonaws.com/v1`.
 
 ---
 
-### Useful AWS Console Links (eu-north-1)
+### Useful AWS Console Links (eu-west-1)
 
 | Service | Direct Link |
 |---------|------------|
-| CloudFormation Stacks | [eu-north-1.console.aws.amazon.com/cloudformation/home?region=eu-north-1#/stacks](https://eu-north-1.console.aws.amazon.com/cloudformation/home?region=eu-north-1#/stacks) |
-| SageMaker Endpoints | [eu-north-1.console.aws.amazon.com/sagemaker/home?region=eu-north-1#/endpoints](https://eu-north-1.console.aws.amazon.com/sagemaker/home?region=eu-north-1#/endpoints) |
-| Lambda Functions | [eu-north-1.console.aws.amazon.com/lambda/home?region=eu-north-1#/functions](https://eu-north-1.console.aws.amazon.com/lambda/home?region=eu-north-1#/functions) |
-| API Gateway APIs | [eu-north-1.console.aws.amazon.com/apigateway/home?region=eu-north-1#/apis](https://eu-north-1.console.aws.amazon.com/apigateway/home?region=eu-north-1#/apis) |
-| EC2 Instances | [eu-north-1.console.aws.amazon.com/ec2/home?region=eu-north-1#Instances](https://eu-north-1.console.aws.amazon.com/ec2/home?region=eu-north-1#Instances) |
-| Service Quotas (SageMaker) | [eu-north-1.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas](https://eu-north-1.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas) |
-| CloudWatch Logs | [eu-north-1.console.aws.amazon.com/cloudwatch/home?region=eu-north-1#logsV2:log-groups](https://eu-north-1.console.aws.amazon.com/cloudwatch/home?region=eu-north-1#logsV2:log-groups) |
-| VPC Subnets | [eu-north-1.console.aws.amazon.com/vpc/home?region=eu-north-1#subnets:](https://eu-north-1.console.aws.amazon.com/vpc/home?region=eu-north-1#subnets:) |
+| CloudFormation Stacks | [eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks](https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks) |
+| SageMaker Endpoints | [eu-west-1.console.aws.amazon.com/sagemaker/home?region=eu-west-1#/endpoints](https://eu-west-1.console.aws.amazon.com/sagemaker/home?region=eu-west-1#/endpoints) |
+| Lambda Functions | [eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions) |
+| API Gateway APIs | [eu-west-1.console.aws.amazon.com/apigateway/home?region=eu-west-1#/apis](https://eu-west-1.console.aws.amazon.com/apigateway/home?region=eu-west-1#/apis) |
+| EC2 Instances | [eu-west-1.console.aws.amazon.com/ec2/home?region=eu-west-1#Instances](https://eu-west-1.console.aws.amazon.com/ec2/home?region=eu-west-1#Instances) |
+| Service Quotas (SageMaker) | [eu-west-1.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas](https://eu-west-1.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas) |
+| CloudWatch Logs | [eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups) |
+| VPC Subnets | [eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#subnets:](https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#subnets:) |

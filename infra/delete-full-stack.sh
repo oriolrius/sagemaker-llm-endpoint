@@ -7,7 +7,7 @@
 set -e
 
 STACK_NAME="openai-sagemaker-stack"
-REGION="${AWS_REGION:-eu-north-1}"
+REGION="${AWS_REGION:-eu-west-1}"
 KEEP_S3=false
 
 # Parse arguments
@@ -30,7 +30,7 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Options:"
             echo "  --stack-name    Stack name (default: openai-sagemaker-stack)"
-            echo "  --region        AWS region (default: eu-north-1)"
+            echo "  --region        AWS region (default: eu-west-1)"
             echo "  --keep-s3       Keep S3 bucket with Lambda artifacts"
             exit 0
             ;;

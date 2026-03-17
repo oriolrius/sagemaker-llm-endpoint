@@ -9,7 +9,7 @@ import boto3
 
 # Environment configuration
 SAGEMAKER_ENDPOINT_NAME = os.environ.get("SAGEMAKER_ENDPOINT_NAME", "")
-AWS_REGION = os.environ.get("AWS_REGION", "eu-north-1")
+AWS_REGION = os.environ.get("AWS_REGION", "eu-west-1")
 
 # Lazy-initialized SageMaker client
 _sagemaker_runtime = None
