@@ -1,7 +1,7 @@
 [project]
 name = "sagemaker-using-model"
-version = "0.1.0"
-description = "AWS SageMaker vLLM deployment with OpenAI-compatible API and OpenWebUI"
+version = "1.0.0"
+description = "Deploy HuggingFace LLMs on AWS SageMaker with OpenAI-compatible API and OpenWebUI"
 readme = "README.md"
 requires-python = ">=3.11"
 keywords = ["sagemaker", "vllm", "openai", "lambda", "openwebui", "aws"]
@@ -14,7 +14,7 @@ dev = [
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.1.0"
+version = "1.0.0"
 version_files = [
     "pyproject.toml:^version",
     "lambda/openai-proxy/pyproject.toml:^version",
