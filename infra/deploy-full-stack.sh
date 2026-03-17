@@ -235,20 +235,20 @@ echo "OpenWebUI files uploaded to: s3://$LAMBDA_S3_BUCKET/openwebui/"
 #############################################
 # Build CloudFormation Parameters
 #############################################
-PARAMS="ParameterKey=HuggingFaceModelId,ParameterValue=$MODEL_ID"
-PARAMS="$PARAMS ParameterKey=SageMakerInstanceType,ParameterValue=$SAGEMAKER_INSTANCE"
-PARAMS="$PARAMS ParameterKey=EC2InstanceType,ParameterValue=$EC2_INSTANCE"
-PARAMS="$PARAMS ParameterKey=VpcId,ParameterValue=$VPC_ID"
-PARAMS="$PARAMS ParameterKey=SubnetId,ParameterValue=$SUBNET_ID"
-PARAMS="$PARAMS ParameterKey=LambdaS3Bucket,ParameterValue=$LAMBDA_S3_BUCKET"
-PARAMS="$PARAMS ParameterKey=LambdaS3Key,ParameterValue=$LAMBDA_S3_KEY"
+PARAMS="HuggingFaceModelId=$MODEL_ID"
+PARAMS="$PARAMS SageMakerInstanceType=$SAGEMAKER_INSTANCE"
+PARAMS="$PARAMS EC2InstanceType=$EC2_INSTANCE"
+PARAMS="$PARAMS VpcId=$VPC_ID"
+PARAMS="$PARAMS SubnetId=$SUBNET_ID"
+PARAMS="$PARAMS LambdaS3Bucket=$LAMBDA_S3_BUCKET"
+PARAMS="$PARAMS LambdaS3Key=$LAMBDA_S3_KEY"
 
 if [ -n "$KEY_PAIR" ]; then
-    PARAMS="$PARAMS ParameterKey=EC2KeyPair,ParameterValue=$KEY_PAIR"
+    PARAMS="$PARAMS EC2KeyPair=$KEY_PAIR"
 fi
 
 if [ -n "$EXTERNAL_SAGEMAKER_ROLE_ARN" ]; then
-    PARAMS="$PARAMS ParameterKey=ExternalSageMakerRoleArn,ParameterValue=$EXTERNAL_SAGEMAKER_ROLE_ARN"
+    PARAMS="$PARAMS ExternalSageMakerRoleArn=$EXTERNAL_SAGEMAKER_ROLE_ARN"
 fi
 
 # Deploy stack
